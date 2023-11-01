@@ -26,7 +26,7 @@ To master this spell, follow these simple guidelines.
 
 1. Use a magical mirror to clone the repository
    ```
-   git clone https://github.com/yourusername/undetectable-reverse-shell.git
+   git clone https://github.com/1603160/Undetectable-Reverse-Shell-1.0.git
    ```
 2. Traverse to the script's secret chamber
    ```
