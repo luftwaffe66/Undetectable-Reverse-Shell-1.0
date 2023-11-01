@@ -1,5 +1,5 @@
 
-# Undetectable Reverse Shell
+# Undetectable Reverse Shell 1.0
 
 ## Overview
 Welcome, brave adventurers, to the Undetectable Reverse Shell, an arcane spell crafted in the Python language that summons network spirits to forge a hidden passage between two castles. This incantation utilizes mysterious PowerShell chants to bypass the watchful eyes of the royal guards.
