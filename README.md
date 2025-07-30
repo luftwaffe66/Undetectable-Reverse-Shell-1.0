@@ -56,7 +56,7 @@ cd Undetectable-Reverse-Shell-1.0
 Run the generator using Python 3:
 
 ```bash
-python3 main.py
+python3 generador.py
 ```
 
 You will be prompted for:
